@@ -11,25 +11,17 @@
       <img class="huawei_img" src="huawei.png" alt="Huawei" />
       <h1>🎉 Lucky Box Draw 🎉</h1>
 
-      <textarea
-        id="nameInput"
-        placeholder="Enter names (one per line or comma-separated)"
-      ></textarea>
-      <button onclick="addNames()">➕ Add Names</button>
-
-      <div class="names-box">
-        <h3>🎯 Participants</h3>
-        <ul id="nameList"></ul>
-        <button class="clear" onclick="clearNames()">🗑 Clear All</button>
-      </div>
-
       <button class="draw" onclick="startDraw()">🎲 START DRAW</button>
 
       <div class="winner-box" id="winnerBox">
         <p>🎊 Winner: <span id="winnerName">---</span></p>
       </div>
+
+      <a href="participants.html"
+        ><button class="clear">👥 Manage Participants</button></a
+      >
     </div>
 
-    <script src="script.js"></script>
+    <script src="draw.js"></script>
   </body>
 </html>
