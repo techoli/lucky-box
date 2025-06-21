@@ -1,0 +1,91 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel | Lucky Box</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .admin-container {
+        width: 90%;
+        max-width: 600px;
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .admin-container select,
+      .admin-container input[type="file"] {
+        margin: 10px 0;
+        padding: 10px;
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+      }
+      .admin-container img {
+        margin-top: 10px;
+        height: 60px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-container">
+      <h1>⚙️ Admin Settings</h1>
+
+      <label for="winner-select">Select Specific Winner (Optional):</label>
+      <select id="winner-select">
+        <option value="">-- Random Selection --</option>
+      </select>
+
+      <label for="logo-upload">Upload New Logo:</label>
+      <input type="file" id="logo-upload" accept="image/*" />
+      <img id="logo-preview" src="huawei.png" alt="Logo Preview" />
+
+      <button onclick="saveAdminSettings()">💾 Save Settings</button>
+      <a href="index.html"><button class="draw">🎲 Back to Draw</button></a>
+    </div>
+
+    <script>
+      const names = JSON.parse(localStorage.getItem("luckyBoxNames") || "[]");
+      const winnerSelect = document.getElementById("winner-select");
+
+      function populateDropdown() {
+        names.forEach((name) => {
+          const opt = document.createElement("option");
+          opt.value = name;
+          opt.textContent = name;
+          winnerSelect.appendChild(opt);
+        });
+
+        // Set current selected if exists
+        const current = localStorage.getItem("selectedWinner");
+        if (current) {
+          winnerSelect.value = current;
+        }
+      }
+
+      document
+        .getElementById("logo-upload")
+        .addEventListener("change", function () {
+          const file = this.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const logoData = e.target.result;
+            document.getElementById("logo-preview").src = logoData;
+            localStorage.setItem("logoImage", logoData);
+          };
+          reader.readAsDataURL(file);
+        });
+
+      function saveAdminSettings() {
+        const selected = winnerSelect.value;
+        localStorage.setItem("selectedWinner", selected);
+        alert("Settings saved!");
+      }
+
+      populateDropdown();
+    </script>
+  </body>
+</html>
