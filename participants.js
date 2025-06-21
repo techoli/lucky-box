@@ -1,5 +1,14 @@
 let names = JSON.parse(localStorage.getItem("luckyBoxNames") || "[]");
 
+window.onload = function () {
+  // Set logo from admin settings
+  const savedLogo = localStorage.getItem("logoImage");
+  if (savedLogo) {
+    const logoImg = document.querySelector(".huawei_img");
+    if (logoImg) logoImg.src = savedLogo;
+  }
+};
+
 function handleFile() {
   const fileInput = document.getElementById("excelFile");
   const file = fileInput.files[0];
