@@ -67,3 +67,7 @@ button:hover {
   font-size: 1.2rem;
   background-color: #6c5ce7; /* purple */
 }
+
+.clear {
+  background: red !important;
+}

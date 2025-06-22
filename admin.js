@@ -12,13 +12,6 @@ import {
   onValue,
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
-import {
-  getStorage,
-  ref as sRef,
-  uploadBytes,
-  getDownloadURL,
-} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
-
 // ✅ Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDPgkDyKwQSUkcPbEOCg4wCsmxBf01YYWk",
@@ -33,9 +26,8 @@ const firebaseConfig = {
 const app =
   getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 const db = getDatabase(app);
-const storage = getStorage(app);
 
-// ✅ Loader functions
+// ✅ Loader
 function showLoader() {
   document.getElementById("loader").style.display = "block";
 }
@@ -43,14 +35,12 @@ function hideLoader() {
   document.getElementById("loader").style.display = "none";
 }
 
-// ✅ Hold file before upload
-let selectedLogoFile = null;
-
-// ✅ Populate dropdown and winner
+// ✅ Populate dropdown and current values
 async function populateDropdown() {
   try {
     showLoader();
 
+    // Fill winner dropdown
     const participantsRef = ref(db, "participants");
     const snapshot = await get(participantsRef);
     const winnerSelect = document.getElementById("winner-select");
@@ -66,6 +56,7 @@ async function populateDropdown() {
       });
     }
 
+    // Watch for current selected winner
     const selectedRef = ref(db, "settings/selectedWinner");
     onValue(selectedRef, (snap) => {
       const currentInput = document.getElementById("current-winner");
@@ -78,6 +69,15 @@ async function populateDropdown() {
         winnerSelect.value = "";
       }
     });
+
+    // Show logo URL
+    const logoRef = ref(db, "settings/logoUrl");
+    const logoSnap = await get(logoRef);
+    if (logoSnap.exists()) {
+      const logoURL = logoSnap.val();
+      document.getElementById("logo-url").value = logoURL;
+      document.getElementById("logo-preview").src = logoURL;
+    }
   } catch (err) {
     console.error("Dropdown error:", err);
   } finally {
@@ -85,23 +85,23 @@ async function populateDropdown() {
   }
 }
 
-// ✅ Save settings (winner + logo)
+// ✅ Save both selected winner and logo URL
 window.saveAdminSettings = async function () {
   const selected = document.getElementById("winner-select").value;
+  const logoUrl = document.getElementById("logo-url").value.trim();
+
+  if (!logoUrl) {
+    alert("Please select a logo image before saving.");
+    return;
+  }
 
   try {
     showLoader();
 
-    // Save selected winner
     await set(ref(db, "settings/selectedWinner"), selected);
-
-    // Upload new logo if changed
-    if (selectedLogoFile) {
-      const logoRef = sRef(storage, "logo/logo.png");
-      await uploadBytes(logoRef, selectedLogoFile);
-      const url = await getDownloadURL(logoRef);
-      await set(ref(db, "settings/logoUrl"), url);
-      selectedLogoFile = null;
+    if (logoUrl) {
+      await set(ref(db, "settings/logoUrl"), logoUrl);
+      document.getElementById("logo-preview").src = logoUrl;
     }
 
     alert("Settings saved successfully.");
@@ -113,34 +113,26 @@ window.saveAdminSettings = async function () {
   }
 };
 
-// ✅ Clear winner
+// ✅ Clear selected winner
 window.clearSpecificWinner = async function () {
   if (!confirm("Are you sure you want to clear the specific winner?")) return;
+
   try {
     showLoader();
+
+    // ❌ Remove specific winner from database
     await remove(ref(db, "settings/selectedWinner"));
-    alert("Specific winner cleared.");
+
+    // ❌ Remove logo from database (revert to default)
+    // await remove(ref(db, "settings/logoUrl"));
+
+    alert("Specific winner cleared. Random winner will be used.");
   } catch (err) {
     console.error("Clear error:", err);
-    alert("Error clearing winner.");
+    alert("Error clearing settings.");
   } finally {
     hideLoader();
   }
 };
 
-// ✅ Handle logo selection
-document.getElementById("logo-upload").addEventListener("change", function () {
-  const file = this.files[0];
-  if (!file) return;
-
-  selectedLogoFile = file;
-
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    document.getElementById("logo-preview").src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-});
-
-// ✅ Initial load
 populateDropdown();

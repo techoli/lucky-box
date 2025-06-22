@@ -53,11 +53,16 @@ function hideLoader() {
 function loadLogoLive() {
   const logoRef = ref(db, "settings/logoUrl");
   onValue(logoRef, (snapshot) => {
+    const img = document.querySelector(".huawei_img"); // <-- fix here
+    if (!img) return; // prevent errors
+
     if (snapshot.exists()) {
-      const url = snapshot.val();
-      const img = document.querySelector(".huawei_img");
-      if (img) img.src = url;
+      img.src = snapshot.val();
+    } else {
+      img.src = "default_logo.png"; // fallback
     }
+
+    img.style.display = "block"; // show only after src set
   });
 }
 

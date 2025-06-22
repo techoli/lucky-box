@@ -118,6 +118,13 @@ body {
   left: -20px;
   top: 1px;
 }
+.huawei_img2 {
+  position: absolute;
+  height: 40px;
+  width: 90px;
+  left: -20px;
+  top: 1px;
+}
 h1 {
   margin-bottom: 1rem;
   font-size: 2rem;

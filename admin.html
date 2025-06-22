@@ -9,7 +9,7 @@
     <div class="admin-container">
       <h1>⚙️ Admin Settings</h1>
 
-      <!-- <label>Current Specific Winner:</label> -->
+      <label>Default Winner:</label>
       <input
         style="margin-bottom: 20px"
         type="text"
@@ -22,21 +22,28 @@
         <option value="">-- Random Selection --</option>
       </select>
 
+      <br /><label for="logo-url">Paste Logo Image URL:</label>
+      <input
+        type="text"
+        id="logo-url"
+        placeholder="https://yourhost.com/logo.png"
+        required
+      />
+      <img
+        id="logo-preview"
+        src="huawei.png"
+        alt="Logo Preview"
+        style="height: 60px; margin-top: 10px"
+      />
+
+      <br /><button onclick="saveAdminSettings()">💾 Save Changes</button>
       <button
         style="margin-bottom: 20px"
         class="clear"
         onclick="clearSpecificWinner()"
       >
-        🧹 Clear Specific Winner
+        🧹 Clear default Winner
       </button>
-
-      <br /><label style="margin-top: 20px" for="logo-upload"
-        >Upload New Logo:</label
-      >
-      <input type="file" id="logo-upload" accept="image/*" />
-      <img id="logo-preview" src="huawei.png" alt="Logo Preview" />
-
-      <button onclick="saveAdminSettings()">💾 Save Selection</button>
       <a href="index.html"><button class="draw">🎲 Back to Draw</button></a>
     </div>
 
@@ -60,6 +67,6 @@
       Loading...
     </div>
 
-    <script type="module" src="admin.js"></script>
+    <script type="module" src="admin.js" defer></script>
   </body>
 </html>

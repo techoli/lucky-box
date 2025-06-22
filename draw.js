@@ -4,6 +4,17 @@ import {
   get,
   onValue, // for real-time updates
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+import {
+  initializeApp,
+  getApps,
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+
+import {
+  getStorage,
+  ref as sRef,
+  uploadBytes,
+  getDownloadURL,
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
 
 let names = [];
 let selectedWinner = null;
@@ -15,7 +26,10 @@ function showLoader() {
 function hideLoader() {
   document.getElementById("loader").style.display = "none";
 }
-
+const app =
+  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const db = getDatabase(app);
+const storage = getStorage(app);
 window.onload = async function () {
   try {
     showLoader();
@@ -28,13 +42,18 @@ window.onload = async function () {
 };
 
 function loadLogoLive() {
-  const db = getDatabase();
   const logoRef = ref(db, "settings/logoUrl");
-
   onValue(logoRef, (snapshot) => {
+    const img = document.querySelector(".huawei_img2"); // <-- fix here
+    if (!img) return; // prevent errors
+
     if (snapshot.exists()) {
-      document.querySelector(".huawei_img").src = snapshot.val();
+      img.src = snapshot.val();
+    } else {
+      img.src = "default_logo.png"; // Fallback
     }
+
+    img.style.display = "block"; // Show image only after src is set
   });
 }
 async function fetchNames() {
