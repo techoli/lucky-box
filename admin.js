@@ -19,7 +19,7 @@ import {
   getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
 
-// Firebase Config
+// ✅ Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDPgkDyKwQSUkcPbEOCg4wCsmxBf01YYWk",
   authDomain: "lucky-box-c773e.firebaseapp.com",
@@ -29,13 +29,13 @@ const firebaseConfig = {
   appId: "1:785898929349:web:1321d9c578e6c00e7184ac",
 };
 
-// Initialize Firebase
+// ✅ Initialize Firebase
 const app =
   getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-// Loader
+// ✅ Loader functions
 function showLoader() {
   document.getElementById("loader").style.display = "block";
 }
@@ -43,45 +43,49 @@ function hideLoader() {
   document.getElementById("loader").style.display = "none";
 }
 
-// Logo file (previewed but not uploaded yet)
+// ✅ Hold file before upload
 let selectedLogoFile = null;
 
-// Populate participants and selected winner
+// ✅ Populate dropdown and winner
 async function populateDropdown() {
   try {
     showLoader();
-    const snapshot = await get(ref(db, "participants"));
-    const select = document.getElementById("winner-select");
-    select.innerHTML = `<option value="">-- Random Selection --</option>`;
+
+    const participantsRef = ref(db, "participants");
+    const snapshot = await get(participantsRef);
+    const winnerSelect = document.getElementById("winner-select");
+    winnerSelect.innerHTML = `<option value="">-- Random Selection --</option>`;
 
     if (snapshot.exists()) {
-      Object.values(snapshot.val()).forEach((name) => {
+      const values = Object.values(snapshot.val());
+      values.forEach((name) => {
         const opt = document.createElement("option");
         opt.value = name;
         opt.textContent = name;
-        select.appendChild(opt);
+        winnerSelect.appendChild(opt);
       });
     }
 
-    // Watch for selected winner in real time
-    onValue(ref(db, "settings/selectedWinner"), (snap) => {
+    const selectedRef = ref(db, "settings/selectedWinner");
+    onValue(selectedRef, (snap) => {
       const currentInput = document.getElementById("current-winner");
       if (snap.exists()) {
-        currentInput.value = snap.val();
-        select.value = snap.val();
+        const selectedName = snap.val();
+        currentInput.value = selectedName;
+        winnerSelect.value = selectedName;
       } else {
         currentInput.value = "";
-        select.value = "";
+        winnerSelect.value = "";
       }
     });
   } catch (err) {
-    console.error("Error populating dropdown:", err);
+    console.error("Dropdown error:", err);
   } finally {
     hideLoader();
   }
 }
 
-// Save all settings: winner + logo
+// ✅ Save settings (winner + logo)
 window.saveAdminSettings = async function () {
   const selected = document.getElementById("winner-select").value;
 
@@ -91,41 +95,40 @@ window.saveAdminSettings = async function () {
     // Save selected winner
     await set(ref(db, "settings/selectedWinner"), selected);
 
-    // Upload new logo (if any)
+    // Upload new logo if changed
     if (selectedLogoFile) {
       const logoRef = sRef(storage, "logo/logo.png");
       await uploadBytes(logoRef, selectedLogoFile);
       const url = await getDownloadURL(logoRef);
       await set(ref(db, "settings/logoUrl"), url);
-      selectedLogoFile = null; // clear after saving
+      selectedLogoFile = null;
     }
 
     alert("Settings saved successfully.");
   } catch (err) {
-    console.error("Error saving settings:", err);
-    alert("Error saving settings. See console for details.");
+    console.error("Save error:", err);
+    alert("Error saving settings.");
   } finally {
     hideLoader();
   }
 };
 
-// Clear winner
+// ✅ Clear winner
 window.clearSpecificWinner = async function () {
-  if (!confirm("Clear specific winner and allow random?")) return;
-
+  if (!confirm("Are you sure you want to clear the specific winner?")) return;
   try {
     showLoader();
     await remove(ref(db, "settings/selectedWinner"));
     alert("Specific winner cleared.");
   } catch (err) {
-    console.error("Error clearing winner:", err);
-    alert("Failed to clear winner.");
+    console.error("Clear error:", err);
+    alert("Error clearing winner.");
   } finally {
     hideLoader();
   }
 };
 
-// File select: only preview
+// ✅ Handle logo selection
 document.getElementById("logo-upload").addEventListener("change", function () {
   const file = this.files[0];
   if (!file) return;
@@ -139,5 +142,5 @@ document.getElementById("logo-upload").addEventListener("change", function () {
   reader.readAsDataURL(file);
 });
 
-// Start up
+// ✅ Initial load
 populateDropdown();
