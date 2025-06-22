@@ -1,0 +1,69 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #1d1f27, #3a3f58); /* dark gradient */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.admin-container {
+  width: 90%;
+  max-width: 600px;
+  background: #2b2d42; /* dark container */
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  position: relative;
+}
+
+.admin-container h1 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: #ffde59; /* bright gold */
+}
+
+.admin-container select,
+.admin-container input[type="file"] {
+  margin: 10px 0;
+  padding: 10px;
+  width: 100%;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  background-color: #fefefe;
+  color: #2d3436;
+}
+
+.admin-container img {
+  margin-top: 10px;
+  height: 60px;
+  border-radius: 10px;
+  border: 2px solid #ffde59;
+  background-color: white;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #00b894; /* teal */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: #019875;
+}
+
+.draw {
+  margin-top: 20px;
+  font-size: 1.2rem;
+  background-color: #6c5ce7; /* purple */
+}

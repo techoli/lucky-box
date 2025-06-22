@@ -1,62 +1,164 @@
-let names = JSON.parse(localStorage.getItem("luckyBoxNames") || "[]");
+import {
+  initializeApp,
+  getApps,
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 
-window.onload = function () {
-  // Set logo from admin settings
-  const savedLogo = localStorage.getItem("logoImage");
-  if (savedLogo) {
-    const logoImg = document.querySelector(".huawei_img");
-    if (logoImg) logoImg.src = savedLogo;
-  }
+import {
+  getDatabase,
+  ref,
+  get,
+  remove,
+  push,
+  onValue,
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+import {
+  getStorage,
+  ref as sRef,
+  uploadBytes,
+  getDownloadURL,
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDPgkDyKwQSUkcPbEOCg4wCsmxBf01YYWk",
+  authDomain: "lucky-box-c773e.firebaseapp.com",
+  projectId: "lucky-box-c773e",
+  storageBucket: "lucky-box-c773e.appspot.com",
+  messagingSenderId: "785898929349",
+  appId: "1:785898929349:web:1321d9c578e6c00e7184ac",
 };
 
+// Initialize Firebase app once
+const app =
+  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const db = getDatabase(app);
+const storage = getStorage(app);
+
+// Global participants array
+let names = [];
+
+// Loader show/hide helpers
+function showLoader() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = "block";
+}
+
+function hideLoader() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = "none";
+}
+
+// Real-time logo update listener
+function loadLogoLive() {
+  const logoRef = ref(db, "settings/logoUrl");
+  onValue(logoRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const url = snapshot.val();
+      const img = document.querySelector(".huawei_img");
+      if (img) img.src = url;
+    }
+  });
+}
+
+// Fetch participants once from Firebase
+async function fetchNames() {
+  showLoader();
+  try {
+    const snapshot = await get(ref(db, "participants"));
+    if (snapshot.exists()) {
+      names = Object.values(snapshot.val());
+      console.log("Participants fetched:", names);
+    } else {
+      names = [];
+      console.log("No participants found");
+    }
+  } catch (err) {
+    console.error("Error fetching participants:", err);
+    names = [];
+  }
+  hideLoader();
+}
+
+// Render participants into table
+function renderNames() {
+  const tbody = document.querySelector("#nameTable tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = names
+    .map((name, i) => `<tr><td>${i + 1}</td><td>${name}</td></tr>`)
+    .join("");
+}
+
+// Handle Excel file upload and import
 function handleFile() {
   const fileInput = document.getElementById("excelFile");
-  const file = fileInput.files[0];
-  if (!file) {
+  if (!fileInput || !fileInput.files.length) {
     alert("Please select an Excel file.");
     return;
   }
 
+  const file = fileInput.files[0];
   const reader = new FileReader();
-  reader.onload = function (e) {
+
+  reader.onload = async (e) => {
     const data = new Uint8Array(e.target.result);
     const workbook = XLSX.read(data, { type: "array" });
-
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
+    // Flatten and clean names
     const importedNames = json
       .flat()
       .map((n) => String(n).trim())
       .filter((n) => n && !names.includes(n));
 
-    if (importedNames.length === 0) {
+    if (!importedNames.length) {
       alert("No valid names found.");
       return;
     }
 
-    names.push(...importedNames);
-    localStorage.setItem("luckyBoxNames", JSON.stringify(names));
-    renderNames();
+    showLoader();
+    try {
+      for (const name of importedNames) {
+        await push(ref(db, "participants"), name);
+      }
+      await fetchNames();
+      renderNames();
+    } catch (err) {
+      console.error("Error uploading names:", err);
+      alert("Failed to upload names.");
+    } finally {
+      hideLoader();
+    }
   };
 
   reader.readAsArrayBuffer(file);
 }
 
-function renderNames() {
-  const tbody = document.querySelector("#nameTable tbody");
-  tbody.innerHTML = names
-    .map((n, i) => `<tr><td>${i + 1}</td><td>${n}</td></tr>`)
-    .join("");
-}
-
-function clearNames() {
-  if (confirm("Clear all names?")) {
+// Clear all participants
+async function clearNames() {
+  if (!confirm("Clear all names?")) return;
+  showLoader();
+  try {
+    await remove(ref(db, "participants"));
     names = [];
-    localStorage.removeItem("luckyBoxNames");
     renderNames();
+  } catch (err) {
+    console.error("Error clearing names:", err);
+    alert("Failed to clear names.");
+  } finally {
+    hideLoader();
   }
 }
 
-renderNames();
+// Initialization on DOM ready
+document.addEventListener("DOMContentLoaded", async () => {
+  loadLogoLive();
+  await fetchNames();
+  renderNames();
+});
+
+// Expose to global scope
+window.handleFile = handleFile;
+window.clearNames = clearNames;

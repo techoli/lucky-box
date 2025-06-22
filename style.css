@@ -93,12 +93,8 @@ button:hover {
 body {
   margin: 0;
   font-family: "Segoe UI", sans-serif;
-  background: linear-gradient(
-    135deg,
-    #fceabb,
-    #f8b500
-  ); /* warm pastel yellow-orange gradient */
-  color: #2d3436;
+  background: linear-gradient(135deg, #1d1f27, #3a3f58); /* dark gradient */
+  color: white;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -108,10 +104,10 @@ body {
 .container {
   width: 90%;
   max-width: 600px;
-  background: #ffffff;
+  background: #2b2d42; /* dark container */
   padding: 2rem;
   border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
   text-align: center;
   position: relative;
 }

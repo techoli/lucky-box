@@ -8,6 +8,24 @@
   </head>
   <body>
     <div class="container">
+      <div
+        id="loader"
+        style="
+          display: none;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 1.5rem;
+          background: rgba(0, 0, 0, 0.7);
+          color: white;
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          z-index: 9999;
+        "
+      >
+        Loading...
+      </div>
       <img class="huawei_img" src="huawei.png" alt="Huawei" />
       <h1>📥 Import Participants</h1>
 
@@ -36,6 +54,26 @@
     </div>
 
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    <script src="participants.js"></script>
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyDPgkDyKwQSUkcPbEOCg4wCsmxBf01YYWk",
+        authDomain: "lucky-box-c773e.firebaseapp.com",
+        projectId: "lucky-box-c773e",
+        storageBucket: "lucky-box-c773e.firebasestorage.app",
+        messagingSenderId: "785898929349",
+        appId: "1:785898929349:web:1321d9c578e6c00e7184ac",
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+    </script>
+
+    <script type="module" src="participants.js"></script>
   </body>
 </html>
